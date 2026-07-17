@@ -6,6 +6,14 @@
 
 This project is in early development. There is no usable release yet.
 
+## Try it
+
+```console
+python pathtrace.py
+```
+
+The current command prints each raw `PATH` entry in lookup order. Empty entries are shown as `<empty>`.
+
 ## Planned scope
 
 - List every matching executable in `PATH` order.
