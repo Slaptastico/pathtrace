@@ -1,5 +1,6 @@
 import io
 import os
+import tempfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
 from unittest.mock import patch
@@ -22,23 +23,38 @@ class PathEntriesTest(unittest.TestCase):
     )
 
   def test_renders_numbered_entries(self):
-    self.assertEqual(
-      pathtrace.render_entries(["first", "", "third"]),
-      ["1  first", "2  <empty>", "3  third"],
-    )
+    with patch("pathtrace.os.path.exists", return_value=True):
+      self.assertEqual(
+        pathtrace.render_entries(["first", "", "third"]),
+        ["1  first", "2  <empty>", "3  third"],
+      )
 
   def test_renders_duplicate_entries(self):
     normalized_duplicate = os.path.join("first", ".")
 
-    self.assertEqual(
-      pathtrace.render_entries(["first", normalized_duplicate, "", "."]),
-      [
-        "1  first",
-        f"2  {normalized_duplicate}  (duplicate of entry 1)",
-        "3  <empty>",
-        "4  .  (duplicate of entry 3)",
-      ],
-    )
+    with patch("pathtrace.os.path.exists", return_value=True):
+      self.assertEqual(
+        pathtrace.render_entries(["first", normalized_duplicate, "", "."]),
+        [
+          "1  first",
+          f"2  {normalized_duplicate}  (duplicate of entry 1)",
+          "3  <empty>",
+          "4  .  (duplicate of entry 3)",
+        ],
+      )
+
+  def test_marks_nonexistent_entries(self):
+    with tempfile.TemporaryDirectory() as existing_entry:
+      missing_entry = os.path.join(existing_entry, "missing")
+
+      self.assertEqual(
+        pathtrace.render_entries([existing_entry, missing_entry, ""]),
+        [
+          f"1  {existing_entry}",
+          f"2  {missing_entry}  (not found)",
+          "3  <empty>",
+        ],
+      )
 
 
 class MainTest(unittest.TestCase):
@@ -47,7 +63,9 @@ class MainTest(unittest.TestCase):
     path_value = os.pathsep.join(["first", normalized_duplicate])
     output = io.StringIO()
 
-    with patch.dict(os.environ, {"PATH": path_value}, clear=True):
+    with patch.dict(os.environ, {"PATH": path_value}, clear=True), patch(
+      "pathtrace.os.path.exists", return_value=True
+    ):
       with redirect_stdout(output):
         exit_code = pathtrace.main()
 

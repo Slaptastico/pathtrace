@@ -37,6 +37,8 @@ def render_entries(entries):
     line = f"{index:>{index_width}}  {entry or EMPTY_ENTRY}"
     if index in duplicates:
       line += f"  (duplicate of entry {duplicates[index]})"
+    if entry and not os.path.exists(entry):
+      line += "  (not found)"
     lines.append(line)
 
   return lines
