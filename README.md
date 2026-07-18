@@ -12,7 +12,7 @@ This project is in early development. There is no usable release yet.
 python pathtrace.py
 ```
 
-The current command prints each raw `PATH` entry in lookup order. Empty entries are shown as `<empty>`, later duplicate entries are marked with the earlier entry they repeat, and nonexistent entries are marked as `(not found)`.
+The current command prints each raw `PATH` entry in lookup order. Empty entries are shown as `<empty>`, later duplicate entries are marked with the earlier entry they repeat, and case-only differences are called out. Nonexistent entries are marked as `(not found)`.
 
 ## Planned scope
 

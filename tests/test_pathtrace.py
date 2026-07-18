@@ -43,6 +43,15 @@ class PathEntriesTest(unittest.TestCase):
         ],
       )
 
+  def test_marks_case_differences_in_duplicate_entries(self):
+    with patch("pathtrace.os.path.exists", return_value=True), patch(
+      "pathtrace.os.path.normcase", side_effect=str.lower
+    ):
+      self.assertEqual(
+        pathtrace.render_entries(["First", "first"]),
+        ["1  First", "2  first  (duplicate of entry 1; case differs)"],
+      )
+
   def test_marks_nonexistent_entries(self):
     with tempfile.TemporaryDirectory() as existing_entry:
       missing_entry = os.path.join(existing_entry, "missing")

@@ -36,7 +36,11 @@ def render_entries(entries):
   for index, entry in enumerate(entries, start=1):
     line = f"{index:>{index_width}}  {entry or EMPTY_ENTRY}"
     if index in duplicates:
-      line += f"  (duplicate of entry {duplicates[index]})"
+      earlier_index = duplicates[index]
+      line += f"  (duplicate of entry {earlier_index}"
+      if os.path.normpath(entry) != os.path.normpath(entries[earlier_index - 1]):
+        line += "; case differs"
+      line += ")"
     if entry and not os.path.exists(entry):
       line += "  (not found)"
     lines.append(line)
