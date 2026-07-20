@@ -41,8 +41,11 @@ def render_entries(entries):
       if os.path.normpath(entry) != os.path.normpath(entries[earlier_index - 1]):
         line += "; case differs"
       line += ")"
-    if entry and not os.path.exists(entry):
-      line += "  (not found)"
+    if entry:
+      if not os.path.exists(entry):
+        line += "  (not found)"
+      elif not os.path.isdir(entry):
+        line += "  (not a directory)"
     lines.append(line)
 
   return lines

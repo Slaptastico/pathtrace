@@ -23,7 +23,9 @@ class PathEntriesTest(unittest.TestCase):
     )
 
   def test_renders_numbered_entries(self):
-    with patch("pathtrace.os.path.exists", return_value=True):
+    with patch("pathtrace.os.path.exists", return_value=True), patch(
+      "pathtrace.os.path.isdir", return_value=True
+    ):
       self.assertEqual(
         pathtrace.render_entries(["first", "", "third"]),
         ["1  first", "2  <empty>", "3  third"],
@@ -32,7 +34,9 @@ class PathEntriesTest(unittest.TestCase):
   def test_renders_duplicate_entries(self):
     normalized_duplicate = os.path.join("first", ".")
 
-    with patch("pathtrace.os.path.exists", return_value=True):
+    with patch("pathtrace.os.path.exists", return_value=True), patch(
+      "pathtrace.os.path.isdir", return_value=True
+    ):
       self.assertEqual(
         pathtrace.render_entries(["first", normalized_duplicate, "", "."]),
         [
@@ -45,6 +49,8 @@ class PathEntriesTest(unittest.TestCase):
 
   def test_marks_case_differences_in_duplicate_entries(self):
     with patch("pathtrace.os.path.exists", return_value=True), patch(
+      "pathtrace.os.path.isdir", return_value=True
+    ), patch(
       "pathtrace.os.path.normcase", side_effect=str.lower
     ):
       self.assertEqual(
@@ -65,6 +71,13 @@ class PathEntriesTest(unittest.TestCase):
         ],
       )
 
+  def test_marks_existing_file_entries_as_not_a_directory(self):
+    with tempfile.NamedTemporaryFile() as file_entry:
+      self.assertEqual(
+        pathtrace.render_entries([file_entry.name]),
+        [f"1  {file_entry.name}  (not a directory)"],
+      )
+
 
 class MainTest(unittest.TestCase):
   def test_prints_configured_path(self):
@@ -74,6 +87,8 @@ class MainTest(unittest.TestCase):
 
     with patch.dict(os.environ, {"PATH": path_value}, clear=True), patch(
       "pathtrace.os.path.exists", return_value=True
+    ), patch(
+      "pathtrace.os.path.isdir", return_value=True
     ):
       with redirect_stdout(output):
         exit_code = pathtrace.main()
