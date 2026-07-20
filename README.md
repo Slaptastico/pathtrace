@@ -14,6 +14,12 @@ python pathtrace.py
 
 The current command prints each raw `PATH` entry in lookup order. Empty entries are shown as `<empty>`, later duplicate entries are marked with the earlier entry they repeat, and case-only differences are called out. Nonexistent entries are marked as `(not found)`.
 
+## Tests
+
+```console
+python -m unittest
+```
+
 ## Planned scope
 
 - List every matching executable in `PATH` order.
